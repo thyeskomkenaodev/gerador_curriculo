@@ -1124,18 +1124,21 @@
                 
                 // Criar PDF
                 const pdf = new jsPDF('p', 'mm', 'a4');
-                const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight(); // A4: 210mm x 297mm
+                const pdfWidth = pdf.internal.pageSize.getWidth(); // Largura da página A4
+                const pdfHeight = pdf.internal.pageSize.getHeight(); // Altura da página A4
 
                 const canvasWidth = canvas.width;
                 const canvasHeight = canvas.height;
-                const canvasAspectRatio = canvasWidth / canvasHeight;
 
-                // Calcula a altura da imagem no PDF para manter a proporção
-                const imgHeight = pdfWidth / canvasAspectRatio;
+                // Calcula a proporção da imagem e as dimensões para caber em uma única página A4
+                const ratio = Math.min(pdfWidth / canvasWidth, pdfHeight / canvasHeight);
+                const imgWidth = canvasWidth * ratio;
+                const imgHeight = canvasHeight * ratio;
                 
-                // Adicionar a imagem ao PDF
-                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, imgHeight);
+                // Adiciona a imagem ao PDF, centralizada na página
+                const x = (pdfWidth - imgWidth) / 2;
+                const y = 0; // Alinhado ao topo
+                pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
                 
                 // Obter nome do usuário para nome do arquivo
                 const userName = document.getElementById('nome').value || 'curriculo';

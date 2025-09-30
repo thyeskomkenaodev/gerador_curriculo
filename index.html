@@ -700,6 +700,18 @@
                                 <input type="text" id="localizacao" name="localizacao" placeholder="Cidade, Estado" required>
                             </div>
                             <div class="form-group">
+                                <label for="cnh"><i class="fas fa-id-card"></i> CNH (opcional)</label>
+                                <select id="cnh" name="cnh">
+                                    <option value="">Não possuo</option>
+                                    <option value="A">Categoria A</option>
+                                    <option value="B">Categoria B</option>
+                                    <option value="A+B">Categoria A+B</option>
+                                    <option value="C">Categoria C</option>
+                                    <option value="D">Categoria D</option>
+                                    <option value="E">Categoria E</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label for="linkedin"><i class="fab fa-linkedin"></i> LinkedIn (opcional)</label>
                                 <input type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/seu-perfil">
                             </div>
@@ -987,6 +999,12 @@
                                 <i class="fas fa-map-marker-alt"></i>
                                 <span>${data.localizacao}</span>
                             </div>
+                            ${data.cnh ? `
+                            <div class="contact-item">
+                                <i class="fas fa-car"></i>
+                                <span>CNH: ${data.cnh}</span>
+                            </div>
+                            ` : ''}
                             ${data.linkedin ? `
                             <div class="contact-item">
                                 <i class="fab fa-linkedin"></i>
@@ -1072,33 +1090,42 @@
         
         // Baixar PDF
         document.getElementById('baixar-pdf').addEventListener('click', () => {
-            const resumeElement = document.getElementById('resume-preview');
+            const resumeElement = document.getElementById('resume-preview'); // O elemento a ser capturado
+            const loadingElement = document.getElementById('loading-pdf');
             
             // Mostrar loading
-            document.getElementById('loading-pdf').style.display = 'block';
+            loadingElement.style.display = 'block';
+
+            // Força uma largura fixa para a captura, garantindo a qualidade do PDF em qualquer dispositivo
+            const originalWidth = resumeElement.style.width;
+            const originalBoxShadow = resumeElement.style.boxShadow;
+            resumeElement.style.width = '800px';
+            resumeElement.style.boxShadow = 'none'; // Remove a sombra para evitar cortes
             
             // Usar html2canvas para capturar o currículo
             html2canvas(resumeElement, {
-                scale: 2, // Maior qualidade
+                scale: 2.5, // Aumenta a escala para uma qualidade de imagem superior
                 useCORS: true,
-                logging: false
+                logging: false,
+                windowWidth: resumeElement.scrollWidth,
+                windowHeight: resumeElement.scrollHeight
             }).then(canvas => {
                 const imgData = canvas.toDataURL('image/jpeg', 1.0);
                 
                 // Criar PDF
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
-                const pdfHeight = pdf.internal.pageSize.getHeight();
-                
-                // Calcular dimensões para a imagem no PDF
-                const imgWidth = canvas.width;
-                const imgHeight = canvas.height;
-                const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-                const imgX = (pdfWidth - imgWidth * ratio) / 2;
-                const imgY = 10;
+                const pdfHeight = pdf.internal.pageSize.getHeight(); // A4: 210mm x 297mm
+
+                const canvasWidth = canvas.width;
+                const canvasHeight = canvas.height;
+                const canvasAspectRatio = canvasWidth / canvasHeight;
+
+                // Calcula a altura da imagem no PDF para manter a proporção
+                const imgHeight = pdfWidth / canvasAspectRatio;
                 
                 // Adicionar a imagem ao PDF
-                pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, imgHeight);
                 
                 // Obter nome do usuário para nome do arquivo
                 const userName = document.getElementById('nome').value || 'curriculo';
@@ -1106,13 +1133,14 @@
                 
                 // Baixar o PDF
                 pdf.save(fileName);
-                
-                // Esconder loading
-                document.getElementById('loading-pdf').style.display = 'none';
             }).catch(error => {
                 console.error('Erro ao gerar PDF:', error);
                 alert('Erro ao gerar PDF. Tente novamente.');
-                document.getElementById('loading-pdf').style.display = 'none';
+            }).finally(() => {
+                // Restaura os estilos originais do elemento e esconde o loading
+                resumeElement.style.width = originalWidth;
+                resumeElement.style.boxShadow = originalBoxShadow;
+                loadingElement.style.display = 'none';
             });
         });
         
@@ -1129,6 +1157,7 @@
             document.getElementById('email').value = 'ana.silva@email.com';
             document.getElementById('telefone').value = '(11) 98765-4321';
             document.getElementById('localizacao').value = 'São Paulo, SP';
+            document.getElementById('cnh').value = 'B';
             document.getElementById('linkedin').value = 'https://linkedin.com/in/ana-silva';
             document.getElementById('github').value = 'https://github.com/anasilva';
             document.getElementById('resumo').value = 'Desenvolvedora Front-end com 5 anos de experiência em criação de interfaces modernas e responsivas. Especializada em React, Vue.js e desenvolvimento de aplicações web escaláveis. Apaixonada por UX/UI e sempre em busca das melhores práticas de desenvolvimento.';

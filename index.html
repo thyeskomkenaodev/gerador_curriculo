@@ -684,6 +684,10 @@
                                 <input type="text" id="nome" name="nome" required>
                             </div>
                             <div class="form-group">
+                                <label for="idade"><i class="fas fa-birthday-cake"></i> Idade</label>
+                                <input type="number" id="idade" name="idade" placeholder="Ex: 28" required>
+                            </div>
+                            <div class="form-group">
                                 <label for="titulo"><i class="fas fa-briefcase"></i> Título Profissional</label>
                                 <input type="text" id="titulo" name="titulo" placeholder="Ex: Desenvolvedor Front-end Sênior" required>
                             </div>
@@ -999,6 +1003,12 @@
                                 <i class="fas fa-map-marker-alt"></i>
                                 <span>${data.localizacao}</span>
                             </div>
+                            ${data.idade ? `
+                            <div class="contact-item">
+                                <i class="fas fa-birthday-cake"></i>
+                                <span>${data.idade} anos</span>
+                            </div>
+                            ` : ''}
                             ${data.cnh ? `
                             <div class="contact-item">
                                 <i class="fas fa-car"></i>
@@ -1153,6 +1163,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             // Dados de exemplo (remova esta parte em produção)
             document.getElementById('nome').value = 'Ana Silva Santos';
+            document.getElementById('idade').value = '28';
             document.getElementById('titulo').value = 'Desenvolvedora Front-end Sênior';
             document.getElementById('email').value = 'ana.silva@email.com';
             document.getElementById('telefone').value = '(11) 98765-4321';
